@@ -11,9 +11,9 @@ Red = (1, 0, 0)
 Green = (0, 1, 0)
 Blue = (0, 0, 1)
 
-def encoder(img):
 
-    cmap = (0, 1, 1)
+def encoder(img):
+    print('Encoding image')
 
     # 3
     cmred = clr.LinearSegmentedColormap.from_list('myred', [(0, 0, 0), Red], N=256)
@@ -31,41 +31,62 @@ def encoder(img):
     plt.figure()
     plt.imshow(B, cmblue)
 
-    #4
+    # 4
     print(img.shape)
 
-    print('encode img')
+    height_or, width_or, channels = img.shape
 
-def decoder(img):
+    height = height_or
+    width = width_or
 
-    #3
-    cmredI = clr.LinearSegmentedColormap.from_list('myred', [Red, (0, 0, 0)], N=256)
-    cmgreenI = clr.LinearSegmentedColormap.from_list('mygreen', [Green, (0, 0, 0)], N=256)
-    cmblueI = clr.LinearSegmentedColormap.from_list('myblue', [Blue, (0, 0, 0)], N=256)
+    while (height % 16) != 0:
+        img = np.pad(img, ((0, height), (0, 0), (0, 0)), mode="edge")
+        height = img.shape[0]
+    while (width % 16) != 0:
+        img = np.pad(img, ((0, 0), (0, width), (0, 0)), mode="edge")
+        width = img.shape[1]
 
     plt.figure()
-    plt.imshow(img, cmredI)
-    plt.figure()
-    plt.imshow(img, cmgreenI)
-    plt.figure()
-    plt.imshow(img, cmblueI)
+    plt.imshow(img)
+    print(img.shape)
 
-    print('decode img')
+    decoder(img, height_or, width_or)
+
+
+def decoder(img, height, width):
+    print('Decoding image')
+
+    # 4
+    img = img[0:height, 0:width]
+
+    plt.figure()
+    plt.imshow(img)
+    print(img.shape)
+
+    # 3
+    cmred_rev = clr.LinearSegmentedColormap.from_list('myred', [Red, (0, 0, 0)], N=256)
+    cmgreen_rev = clr.LinearSegmentedColormap.from_list('mygreen', [Green, (0, 0, 0)], N=256)
+    cmblue_rev = clr.LinearSegmentedColormap.from_list('myblue', [Blue, (0, 0, 0)], N=256)
+
+    plt.figure()
+    plt.imshow(img, cmred_rev)
+    plt.figure()
+    plt.imshow(img, cmgreen_rev)
+    plt.figure()
+    plt.imshow(img, cmblue_rev)
+
 
 def main():
-    #1
+    # 1
     img = {}
 
     img[0] = plt.imread('peppers.bmp')
     img[1] = plt.imread('logo.bmp')
     img[2] = plt.imread('barn_mountains.bmp')
 
-    encoder(img[0])
-
-    imgRec = decoder(img[0])
+    encoder(img[1])
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     plt.close('all')
     main()
