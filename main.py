@@ -54,14 +54,15 @@ def encoder(img):
     width = width_or
 
     while (height % 16) != 0:
-        img = np.pad(img, ((0, height), (0, 0), (0, 0)), mode="edge")
-        height = img.shape[0]
+        img = np.pad(img, ((0, 1), (0, 0), (0, 0)), mode="edge")
+        height, width, c = img.shape
     while (width % 16) != 0:
-        img = np.pad(img, ((0, 0), (0, width), (0, 0)), mode="edge")
-        width = img.shape[1]
+        img = np.pad(img, ((0, 0), (0, 1), (0, 0)), mode="edge")
+        height, width, c = img.shape
 
     plt.figure()
     plt.imshow(img)
+    plt.axis('off')
     plt.show()
     print(img.shape)
 
@@ -76,9 +77,9 @@ def decoder(img, height, width):
 
     plt.figure()
     plt.imshow(img)
-    print(img.shape)
     plt.axis('off')
     plt.show()
+    print(img.shape)
 
     # 3
 
@@ -110,10 +111,10 @@ def main():
     img[1] = plt.imread('logo.bmp')
     img[2] = plt.imread('barn_mountains.bmp')
 
-    h, w, c = img[1].shape
+    h, w, c = img[2].shape
 
-    encoder(img[1])
-    decoder(img[1], h, w)
+    encoder(img[2])
+    decoder(img[2], h, w)
 
 
 if __name__ == '__main__':
