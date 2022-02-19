@@ -7,29 +7,43 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as clr
 
-Red = (1, 0, 0)
-Green = (0, 1, 0)
-Blue = (0, 0, 1)
+colorlist = ["gold", "red"]
+colorlistRed = ["black", "red"]
+colorlistGreen = ["black", "green"]
+colorlistBlue = ["black", "blue"]
 
 
 def encoder(img):
     print('Encoding image')
-
     # 3
-    cmred = clr.LinearSegmentedColormap.from_list('myred', [(0, 0, 0), Red], N=256)
-    cmgreen = clr.LinearSegmentedColormap.from_list('mygreen', [(0, 0, 0), Green], N=256)
-    cmblue = clr.LinearSegmentedColormap.from_list('myblue', [(0, 0, 0), Blue], N=256)
 
     R = img[:, :, 0]
     G = img[:, :, 1]
     B = img[:, :, 2]
 
+    cmgen = clr.LinearSegmentedColormap.from_list('myclrmap', colorlist, N=256)
+
+    plt.figure()
+    plt.imshow(R, cmgen)
+    plt.axis('off')
+    plt.show()
+
+    cmred = clr.LinearSegmentedColormap.from_list('myred', colorlistRed, N=256)
+    cmgreen = clr.LinearSegmentedColormap.from_list('mygreen', colorlistGreen, N=256)
+    cmblue = clr.LinearSegmentedColormap.from_list('myblue', colorlistBlue, N=256)
+
     plt.figure()
     plt.imshow(R, cmred)
+    plt.axis('off')
+    plt.show()
     plt.figure()
     plt.imshow(G, cmgreen)
+    plt.axis('off')
+    plt.show()
     plt.figure()
     plt.imshow(B, cmblue)
+    plt.axis('off')
+    plt.show()
 
     # 4
     print(img.shape)
@@ -48,9 +62,10 @@ def encoder(img):
 
     plt.figure()
     plt.imshow(img)
+    plt.show()
     print(img.shape)
 
-    decoder(img, height_or, width_or)
+    return img
 
 
 def decoder(img, height, width):
@@ -62,18 +77,29 @@ def decoder(img, height, width):
     plt.figure()
     plt.imshow(img)
     print(img.shape)
+    plt.axis('off')
+    plt.show()
 
     # 3
-    cmred_rev = clr.LinearSegmentedColormap.from_list('myred', [Red, (0, 0, 0)], N=256)
-    cmgreen_rev = clr.LinearSegmentedColormap.from_list('mygreen', [Green, (0, 0, 0)], N=256)
-    cmblue_rev = clr.LinearSegmentedColormap.from_list('myblue', [Blue, (0, 0, 0)], N=256)
+
+    cmred_rev = clr.LinearSegmentedColormap.from_list('myred', colorlistRed[::-1], N=256)
+    cmgreen_rev = clr.LinearSegmentedColormap.from_list('mygreen', colorlistGreen[::-1], N=256)
+    cmblue_rev = clr.LinearSegmentedColormap.from_list('myblue', colorlistBlue[::-1], N=256)
 
     plt.figure()
     plt.imshow(img, cmred_rev)
+    plt.axis('off')
+    plt.show()
     plt.figure()
     plt.imshow(img, cmgreen_rev)
+    plt.axis('off')
+    plt.show()
     plt.figure()
     plt.imshow(img, cmblue_rev)
+    plt.axis('off')
+    plt.show()
+
+    return img
 
 
 def main():
@@ -84,12 +110,14 @@ def main():
     img[1] = plt.imread('logo.bmp')
     img[2] = plt.imread('barn_mountains.bmp')
 
+    h, w, c = img[1].shape
+
     encoder(img[1])
+    decoder(img[1], h, w)
 
 
 if __name__ == '__main__':
     plt.close('all')
     main()
-    plt.show()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
