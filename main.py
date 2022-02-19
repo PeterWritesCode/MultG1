@@ -6,6 +6,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as clr
+import cv2
 
 colorlist = ["gold", "red"]
 colorlistRed = ["black", "red"]
@@ -55,31 +56,71 @@ def encoder(img):
 
     while (height % 16) != 0:
         img = np.pad(img, ((0, 1), (0, 0), (0, 0)), mode="edge")
-        height, width, c = img.shape
+        height = img.shape[0]
     while (width % 16) != 0:
         img = np.pad(img, ((0, 0), (0, 1), (0, 0)), mode="edge")
-        height, width, c = img.shape
+        width = img.shape[1]
 
     plt.figure()
     plt.imshow(img)
-    plt.axis('off')
     plt.show()
     print(img.shape)
 
-    return img
+    #5
+    # R = img[:, :, 0]
+    # floatR = R.astype(np.float)
+    # G = img[:, :, 1]
+    # floatG = G.astype(np.float)
+    # B = img[:, :, 2]
+    # floatB = B.astype(np.float)
+    # cbcr = np.empty_like(img)
+    #
+    # # Y
+    # cbcr[:, :, 0] = .299 * floatR + .587 * floatG + .114 * floatB
+    # # Cb
+    # cbcr[:, :, 1] = -128 - .168736 * floatR - .331264 * floatG + .5 * floatB
+    # # Cr
+    # cbcr[:, :, 2] = -128 + .5 * floatR - .418688 * floatG - .081312 * floatB
+    #
+    # Ycbcr = np.uint8(cbcr)
+
+    transcol = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+    plt.figure()
+    plt.imshow(transcol[:,:,0])
+    print(transcol.shape)
+    plt.axis('off')
+    plt.show()
+
+    plt.figure()
+    plt.imshow(transcol[:, :, 1])
+    plt.axis('off')
+    plt.show()
+
+    plt.figure()
+    plt.imshow(transcol[:, :, 2])
+    plt.axis('off')
+    plt.show()
+
+
+    return transcol
 
 
 def decoder(img, height, width):
     print('Decoding image')
+    # 5
+    transcol = cv2.cvtColor(img, cv2.COLOR_YCrCb2RGB)
+    plt.figure()
+    plt.imshow(transcol)
+    plt.show()
 
     # 4
     img = img[0:height, 0:width]
 
     plt.figure()
     plt.imshow(img)
+    print(img.shape)
     plt.axis('off')
     plt.show()
-    print(img.shape)
 
     # 3
 
@@ -111,7 +152,7 @@ def main():
     img[1] = plt.imread('logo.bmp')
     img[2] = plt.imread('barn_mountains.bmp')
 
-    h, w, c = img[2].shape
+    h, w, c = img[1].shape
 
     encoder(img[2])
     decoder(img[2], h, w)
@@ -121,4 +162,4 @@ if __name__ == '__main__':
     plt.close('all')
     main()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
