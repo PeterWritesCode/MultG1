@@ -190,10 +190,13 @@ def padding(img):
         rowR = R[-1, :]
         rowG = G[-1, :]
         rowB = B[-1, :]
-
-        np.vstack[R, np.repeat(rowR, resto)]
-        np.vstack[G, np.repeat(rowG, resto)]
-        np.vstack[B, np.repeat(rowB, resto)]
+        np.repeat(rowR, resto)
+        np.repeat(rowG, resto)
+        np.repeat(rowB, resto)
+        
+        np.vstack((R, rowR))
+        np.vstack((G, rowG))
+        np.vstack((B, rowB))
 
     if (width % 16) != 0:
         resto = width % 16
@@ -201,10 +204,13 @@ def padding(img):
         columnR = R[:, -1]
         columnG = G[:, -1]
         columnB = B[:, -1]
-
-        np.vstack(R, np.repeat(columnR, resto))
-        np.vstack(G, np.repeat(columnG, resto))
-        np.vstack(B, np.repeat(columnB, resto))
+        np.repeat(columnR, resto,1)
+        np.repeat(columnG, resto,1)
+        np.repeat(columnB, resto,1)
+        
+        np.hstack[R, columnR]
+        np.hstack[G, columnG]
+        np.hstack[B, columnB]
 
     plt.figure()
     plt.imshow(img)
