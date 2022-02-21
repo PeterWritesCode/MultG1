@@ -106,7 +106,7 @@ def YCbCr2RGb(img):
     plt.imshow(img)
     plt.show()
 
-def getImage(img):
+def getImage_inv(img):
     cmred_rev = clr.LinearSegmentedColormap.from_list('myred', colorlistRed[::-1], N=256)
     cmgreen_rev = clr.LinearSegmentedColormap.from_list('mygreen', colorlistGreen[::-1], N=256)
     cmblue_rev = clr.LinearSegmentedColormap.from_list('myblue', colorlistBlue[::-1], N=256)
@@ -166,11 +166,18 @@ def padding(img):
     print(img.shape)
 
 
+def getImageOriginal(img):
+    img = img[0:height, 0:width]
 
+    plt.figure()
+    plt.imshow(img)
+    print(img.shape)
+    plt.axis('off')
+    plt.show()
 def encoder(img):
     print('Encoding image')
+    #2
     visualizacao(img)
-
     #4
     padding(img)
     #5
@@ -182,20 +189,10 @@ def decoder(img, height, width):
     print('Decoding image')
     #5
     YCbCr2RGb(img)
-
     # 4
-    img = img[0:height, 0:width]
-
-    plt.figure()
-    plt.imshow(img)
-    print(img.shape)
-    plt.axis('off')
-    plt.show()
-
+    getImageOriginal(img)
     # 3
-
-
-
+    getImage_inv(img)
 
 def main():
     # 1
