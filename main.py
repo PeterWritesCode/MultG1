@@ -12,12 +12,15 @@ colorlistRed = ["black", "red"]
 colorlistGreen = ["black", "green"]
 colorlistBlue = ["black", "blue"]
 
+
 def visualizacao(img):
     # 3
-    userColormap(img)
-    colormap(img)
+    img = user_colormap(img)
+    img = colormap(img)
+    return img
 
-def userColormap(img):
+
+def user_colormap(img):
     R = img[:, :, 0]
     G = img[:, :, 1]
     B = img[:, :, 2]
@@ -27,6 +30,10 @@ def userColormap(img):
     plt.imshow(R, cmgen)
     plt.axis('off')
     plt.show()
+
+    return img
+
+
 def colormap(img):
     R = img[:, :, 0]
     G = img[:, :, 1]
@@ -48,14 +55,17 @@ def colormap(img):
     plt.axis('off')
     plt.show()
 
+    return img
+
+
 def RGB2YCbCr(img):
     # 5
     R = img[:, :, 0]
-    floatR = R.astype(np.float)
+    floatR = R.astype(float)
     G = img[:, :, 1]
-    floatG = G.astype(np.float)
+    floatG = G.astype(float)
     B = img[:, :, 2]
-    floatB = B.astype(np.float)
+    floatB = B.astype(float)
     cbcr = np.empty_like(img)
 
     # Y
@@ -67,7 +77,7 @@ def RGB2YCbCr(img):
 
     transcol = np.uint8(cbcr)
 
-    colorlistgray = ["black", "gray"]
+    colorlistgray = ["black", (0.5, 0.5, 0.5)]
 
     cmgray = clr.LinearSegmentedColormap.from_list('myclrmap', colorlistgray, N=256)
 
@@ -98,18 +108,44 @@ def getRGB(img):
 
     return R, G, B
 
+
 def invRGB(R, G, B, shape):
     inv = np.zeros(shape)
-    inv[:,:,0] = R
-    inv[:,:,1] = G
-    inv[:,:,2] = B
+    inv[:, :, 0] = R
+    inv[:, :, 1] = G
+    inv[:, :, 2] = B
+
 
 def YCbCr2RGb(img):
-# 5
-    img = cv2.cvtColor(img, cv2.COLOR_YCrCb2BGR)
+
+    tc = np.array([[0.299, 0.587, 0.114],
+                   [-0.168736, -0.331264, 0.5],
+                   [0.5, -0.418688, -0.081312]])
+
+    Y = img[:, :, 0]
+    Cb = img[:, :, 1]
+    Cr = img[:, :, 2]
+
+    tc_invertida = np.linalg.inv(tc)
+    print(tc_invertida)
+
+    # R = 0 + Y * tc_invertida[0][0] + Cb * tc_invertida[0][1] + Cr * tc_invertida[0][2]
+    # G = -128 + Y * tc_invertida[1][0] + Cb * tc_invertida[1][1] + Cr * tc_invertida[1][2]
+    # B = -128 + Y * tc_invertida[2][0] + Cb * tc_invertida[2][1] + Cr * tc_invertida[2][2]
+
+    rgb = img.astype(float)
+    rgb[:, :, [1, 2]] -= 128
+    rgb = rgb.dot(tc_invertida.T)
+    rgb[rgb > 255] = 255
+    rgb[rgb < 0] = 0
+    rgb = np.uint8(rgb)
+
     plt.figure()
-    plt.imshow(img)
+    plt.imshow(rgb)
     plt.show()
+
+    return rgb
+
 
 def getImage_inv(img):
     cmred_rev = clr.LinearSegmentedColormap.from_list('myred', colorlistRed[::-1], N=256)
@@ -131,6 +167,7 @@ def getImage_inv(img):
 
     return img
 
+
 def padding(img):
     print(img.shape)
 
@@ -149,18 +186,22 @@ def padding(img):
 
     if (height % 16) != 0:
         resto = height % 16
+
         rowR = R[-1, :]
         rowG = G[-1, :]
         rowB = B[-1, :]
+
         np.vstack[R, np.repeat(rowR, resto)]
         np.vstack[G, np.repeat(rowG, resto)]
         np.vstack[B, np.repeat(rowB, resto)]
 
     if (width % 16) != 0:
         resto = width % 16
+
         columnR = R[:, -1]
         columnG = G[:, -1]
         columnB = B[:, -1]
+
         np.vstack(R, np.repeat(columnR, resto))
         np.vstack(G, np.repeat(columnG, resto))
         np.vstack(B, np.repeat(columnB, resto))
@@ -171,7 +212,7 @@ def padding(img):
     print(img.shape)
 
 
-def getImageOriginal(img):
+def getImageOriginal(img ,height ,width):
     img = img[0:height, 0:width]
 
     plt.figure()
@@ -179,25 +220,29 @@ def getImageOriginal(img):
     print(img.shape)
     plt.axis('off')
     plt.show()
+
+
 def encoder(img):
     print('Encoding image')
     #2
-    visualizacao(img)
+    img = visualizacao(img)
     #4
-    padding(img)
+    img = padding(img)
     #5
-    RGB2YCbCr(img)
+    img = RGB2YCbCr(img)
 
+    return img
 
 
 def decoder(img, height, width):
     print('Decoding image')
     #5
-    YCbCr2RGb(img)
+    img = YCbCr2RGb(img)
     # 4
     getImageOriginal(img)
     # 3
     getImage_inv(img)
+
 
 def main():
     # 1
@@ -207,9 +252,9 @@ def main():
     img[1] = plt.imread('logo.bmp')
     img[2] = plt.imread('barn_mountains.bmp')
 
-    h, w, c = img[0].shape
+    h, w, c = img[2].shape
 
-    img_enc = encoder(img[0])
+    img_enc = encoder(img[2])
     decoder(img_enc, h, w)
 
 
