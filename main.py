@@ -111,7 +111,7 @@ def encoder(img):
 def decoder(img, height, width):
     print('Decoding image')
     # 5
-    # transcol = cv2.cvtColor(img, cv2.COLOR_YCrCb2RGB)
+    img = cv2.cvtColor(img, cv2.COLOR_YCrCb2BGR)
     plt.figure()
     plt.imshow(img)
     plt.show()
@@ -157,8 +157,8 @@ def main():
 
     h, w, c = img[0].shape
 
-    encoder(img[0])
-    decoder(img[0], h, w)
+    img_enc = encoder(img[0])
+    decoder(img_enc, h, w)
 
 
 if __name__ == '__main__':
