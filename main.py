@@ -66,41 +66,44 @@ def encoder(img):
     plt.show()
     print(img.shape)
 
-    #5
-    # R = img[:, :, 0]
-    # floatR = R.astype(np.float)
-    # G = img[:, :, 1]
-    # floatG = G.astype(np.float)
-    # B = img[:, :, 2]
-    # floatB = B.astype(np.float)
-    # cbcr = np.empty_like(img)
-    #
-    # # Y
-    # cbcr[:, :, 0] = .299 * floatR + .587 * floatG + .114 * floatB
-    # # Cb
-    # cbcr[:, :, 1] = -128 - .168736 * floatR - .331264 * floatG + .5 * floatB
-    # # Cr
-    # cbcr[:, :, 2] = -128 + .5 * floatR - .418688 * floatG - .081312 * floatB
-    #
-    # Ycbcr = np.uint8(cbcr)
+    # 5
+    R = img[:, :, 0]
+    floatR = R.astype(np.float)
+    G = img[:, :, 1]
+    floatG = G.astype(np.float)
+    B = img[:, :, 2]
+    floatB = B.astype(np.float)
+    cbcr = np.empty_like(img)
 
-    transcol = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+    # Y
+    cbcr[:, :, 0] = .299 * floatR + .587 * floatG + .114 * floatB
+    # Cb
+    cbcr[:, :, 1] = -128 - .168736 * floatR - .331264 * floatG + .5 * floatB
+    # Cr
+    cbcr[:, :, 2] = -128 + .5 * floatR - .418688 * floatG - .081312 * floatB
+
+    transcol = np.uint8(cbcr)
+
+    colorlistgray = ["black", "gray"]
+
+    cmgray = clr.LinearSegmentedColormap.from_list('myclrmap', colorlistgray, N=256)
+
+    # transcol = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
     plt.figure()
-    plt.imshow(transcol[:,:,0])
+    plt.imshow(transcol[:, :, 0], cmgray)
     print(transcol.shape)
     plt.axis('off')
     plt.show()
 
     plt.figure()
-    plt.imshow(transcol[:, :, 1])
+    plt.imshow(transcol[:, :, 1], cmgray)
     plt.axis('off')
     plt.show()
 
     plt.figure()
-    plt.imshow(transcol[:, :, 2])
+    plt.imshow(transcol[:, :, 2], cmgray)
     plt.axis('off')
     plt.show()
-
 
     return transcol
 
@@ -108,9 +111,9 @@ def encoder(img):
 def decoder(img, height, width):
     print('Decoding image')
     # 5
-    transcol = cv2.cvtColor(img, cv2.COLOR_YCrCb2RGB)
+    # transcol = cv2.cvtColor(img, cv2.COLOR_YCrCb2RGB)
     plt.figure()
-    plt.imshow(transcol)
+    plt.imshow(img)
     plt.show()
 
     # 4
@@ -152,10 +155,10 @@ def main():
     img[1] = plt.imread('logo.bmp')
     img[2] = plt.imread('barn_mountains.bmp')
 
-    h, w, c = img[1].shape
+    h, w, c = img[0].shape
 
-    encoder(img[2])
-    decoder(img[2], h, w)
+    encoder(img[0])
+    decoder(img[0], h, w)
 
 
 if __name__ == '__main__':
