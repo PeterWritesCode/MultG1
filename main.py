@@ -166,6 +166,7 @@ def padding(img):
     print(img.shape)
 
 
+
 def encoder(img):
     print('Encoding image')
     visualizacao(img)
