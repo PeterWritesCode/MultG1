@@ -190,9 +190,9 @@ def padding(img):
         rowR = R[-1, :]
         rowG = G[-1, :]
         rowB = B[-1, :]
-        np.repeat(rowR, resto)
-        np.repeat(rowG, resto)
-        np.repeat(rowB, resto)
+        np.repeat(rowR, resto, 0)
+        np.repeat(rowG, resto, 0)
+        np.repeat(rowB, resto, 0)
         
         np.vstack((R, rowR))
         np.vstack((G, rowG))
@@ -203,11 +203,12 @@ def padding(img):
 
         columnR = R[:, -1]
         columnG = G[:, -1]
+
         columnB = B[:, -1]
-        np.repeat(columnR, resto,1)
-        np.repeat(columnG, resto,1)
-        np.repeat(columnB, resto,1)
-        
+        np.repeat(columnR, resto, 1)
+        np.repeat(columnG, resto, 1)
+        np.repeat(columnB, resto, 1)
+
         np.hstack[R, columnR]
         np.hstack[G, columnG]
         np.hstack[B, columnB]
@@ -217,8 +218,10 @@ def padding(img):
     plt.show()
     print(img.shape)
 
+    return img
 
-def getImageOriginal(img ,height ,width):
+
+def getImageOriginal(img, height, width):
     img = img[0:height, 0:width]
 
     plt.figure()
@@ -226,6 +229,8 @@ def getImageOriginal(img ,height ,width):
     print(img.shape)
     plt.axis('off')
     plt.show()
+
+    return img
 
 
 def encoder(img):
@@ -240,14 +245,16 @@ def encoder(img):
     return img
 
 
-def decoder(img, height, width):
+def decoder(img, h, w):
     print('Decoding image')
     #5
     img = YCbCr2RGb(img)
     # 4
-    getImageOriginal(img)
+    img = getImageOriginal(img, h, w)
     # 3
-    getImage_inv(img)
+    img = getImage_inv(img)
+
+    return img
 
 
 def main():
@@ -260,8 +267,12 @@ def main():
 
     h, w, c = img[2].shape
 
+    plt.figure()
+    plt.imshow(img[2])
+    plt.show()
+
     img_enc = encoder(img[2])
-    decoder(img_enc, h, w)
+    img_dec = decoder(img_enc, h, w)
 
 
 if __name__ == '__main__':
