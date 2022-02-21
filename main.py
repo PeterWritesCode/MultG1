@@ -6,7 +6,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as clr
-import cv2
 
 colorlist = ["gold", "red"]
 colorlistRed = ["black", "red"]
@@ -97,8 +96,14 @@ def getRGB(img):
     G = img[:, :, 1]
     B = img[:, :, 2]
 
-
     return R, G, B
+
+def invRGB(R, G, B, shape):
+    inv = np.zeros(shape)
+    inv[:,:,0] = R
+    inv[:,:,1] = G
+    inv[:,:,2] = B
+
 def YCbCr2RGb(img):
 # 5
     img = cv2.cvtColor(img, cv2.COLOR_YCrCb2BGR)
