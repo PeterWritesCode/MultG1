@@ -114,6 +114,8 @@ def invRGB(R, G, B, shape):
     inv[:, :, 0] = R
     inv[:, :, 1] = G
     inv[:, :, 2] = B
+    
+    return inv
 
 
 def YCbCr2RGb(img):
@@ -136,6 +138,7 @@ def YCbCr2RGb(img):
     rgb = img.astype(float)
     rgb[:, :, [1, 2]] -= 128
     rgb = rgb.dot(tc_invertida.T)
+    print(tc_invertida.T)
     rgb[rgb > 255] = 255
     rgb[rgb < 0] = 0
     rgb = np.uint8(rgb)
@@ -170,7 +173,7 @@ def getImage_inv(img):
 
 def padding(img):
     print(img.shape)
-
+    print("padding")
     height_or, width_or, channels = img.shape
 
     height = height_or
@@ -185,34 +188,40 @@ def padding(img):
     R, G, B = getRGB(img)
 
     if (height % 16) != 0:
-        resto = height % 16
+        resto = 16 - height % 16
 
-        rowR = R[-1, :]
-        rowG = G[-1, :]
-        rowB = B[-1, :]
-        np.repeat(rowR, resto, 0)
-        np.repeat(rowG, resto, 0)
-        np.repeat(rowB, resto, 0)
+        # rowR = R[-1, :]
+        # rowG = G[-1, :]
+        # rowB = B[-1, :]
+        # rowR = np.repeat(rowR, resto, 0)
+        # rowG = np.repeat(rowG, resto, 0)
+        # rowB = np.repeat(rowB, resto, 0)
         
-        np.vstack((R, rowR))
-        np.vstack((G, rowG))
-        np.vstack((B, rowB))
-
+        # np.r_['-1', img[], rowR]
+        # G = np.r_['-1', G, rowG ]
+        # B = np.r_['-1', B, rowB]
+        img = np.pad(img, ((0, resto), (0, 0), (0, 0)), mode="edge")
+        resto = 0
+        
     if (width % 16) != 0:
-        resto = width % 16
+        resto = 16 - width % 16
 
-        columnR = R[:, -1]
-        columnG = G[:, -1]
+        # columnR = Rc[:, -1]
+        # columnG = Gc[:, -1]
 
-        columnB = B[:, -1]
-        np.repeat(columnR, resto, 1)
-        np.repeat(columnG, resto, 1)
-        np.repeat(columnB, resto, 1)
+        # columnB = Bc[:, -1]
+        # np.repeat(columnR, resto, 1)
+        # np.repeat(columnG, resto, 1)
+        # np.repeat(columnB, resto, 1)
 
-        np.hstack[R, columnR]
-        np.hstack[G, columnG]
-        np.hstack[B, columnB]
-
+        # Rc = np.hstack([R, columnR])
+        # Gc = np.hstack([G, columnG])
+        # Bc = np.hstack([B, columnB])
+        img = np.pad(img, ((0, 0), (0, resto), (0, 0)), mode="edge")
+        resto = 0
+        
+    
+    
     plt.figure()
     plt.imshow(img)
     plt.show()
@@ -273,7 +282,9 @@ def main():
 
     img_enc = encoder(img[2])
     img_dec = decoder(img_enc, h, w)
-
+    comparison = img[2] == img_dec
+    print(comparison.all())
+    print(img[2] ," coco\n" , img_dec)
 
 if __name__ == '__main__':
     plt.close('all')
