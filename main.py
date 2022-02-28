@@ -66,16 +66,16 @@ def RGB2YCbCr(img):
     floatG = G.astype(float)
     B = img[:, :, 2]
     floatB = B.astype(float)
-    cbcr = np.empty_like(img)
+    cbcr = np.empty_like(img, dtype=float)
 
     # Y
     cbcr[:, :, 0] = .299 * floatR + .587 * floatG + .114 * floatB
     # Cb
-    cbcr[:, :, 1] = -128 - .168736 * floatR - .331264 * floatG + .5 * floatB
+    cbcr[:, :, 1] = 128 - .168736 * floatR - .331264 * floatG + .5 * floatB
     # Cr
-    cbcr[:, :, 2] = -128 + .5 * floatR - .418688 * floatG - .081312 * floatB
-
-    transcol = np.uint8(cbcr)
+    cbcr[:, :, 2] = 128 + .5 * floatR - .418688 * floatG - .081312 * floatB
+    
+    transcol = cbcr
 
     colorlistgray = ["black", (0.5, 0.5, 0.5)]
 
@@ -127,21 +127,33 @@ def YCbCr2RGb(img):
     Y = img[:, :, 0]
     Cb = img[:, :, 1]
     Cr = img[:, :, 2]
+    
 
     tc_invertida = np.linalg.inv(tc)
     print(tc_invertida)
 
-    # R = 0 + Y * tc_invertida[0][0] + Cb * tc_invertida[0][1] + Cr * tc_invertida[0][2]
-    # G = -128 + Y * tc_invertida[1][0] + Cb * tc_invertida[1][1] + Cr * tc_invertida[1][2]
-    # B = -128 + Y * tc_invertida[2][0] + Cb * tc_invertida[2][1] + Cr * tc_invertida[2][2]
+    R = Y * tc_invertida[0][0] + (Cb-128) * tc_invertida[0][1] + (Cr-128) * tc_invertida[0][2]
+    G = Y * tc_invertida[1][0] + (Cb-128) * tc_invertida[1][1] + (Cr-128) * tc_invertida[1][2]
+    B = Y * tc_invertida[2][0] + (Cb-128) * tc_invertida[2][1] + (Cr-128) * tc_invertida[2][2]
 
     rgb = img.astype(float)
-    rgb[:, :, [1, 2]] -= 128
-    rgb = rgb.dot(tc_invertida.T)
-    print(tc_invertida.T)
+    print(R[:8,:8])
+    print("-----------------------")
+
+
+    
+    rgb = invRGB(R,G,B,img.shape)
+    rgb = rgb.round()
+    
     rgb[rgb > 255] = 255
     rgb[rgb < 0] = 0
     rgb = np.uint8(rgb)
+    
+    
+   
+    print(tc_invertida.T)
+    
+    
 
     plt.figure()
     plt.imshow(rgb)
@@ -284,7 +296,7 @@ def main():
     img_dec = decoder(img_enc, h, w)
     comparison = img[2] == img_dec
     print(comparison.all())
-    print(img[2] ," coco\n" , img_dec)
+    print(img[2] ," \n A \n" , img_dec)
 
 if __name__ == '__main__':
     plt.close('all')
