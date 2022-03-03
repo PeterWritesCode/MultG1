@@ -6,12 +6,204 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as clr
+import cv2
+import scipy.fftpack as fft
+import math as m
 
 colorlist = ["gold", "red"]
 colorlistRed = ["black", "red"]
 colorlistGreen = ["black", "green"]
 colorlistBlue = ["black", "blue"]
 
+
+def downsample(img):
+
+    print("Downsampling 4:2:0 using no interpolation filter")
+    print()
+    scaleX = 0.5
+    scaleY = 0.5
+
+    stepX = int(1 // scaleX)
+    stepY = int(1 // scaleY)
+
+    dsImg = img[::stepY, ::stepX]
+    fig = plt.figure(figsize=(10, 10))
+    fig.add_subplot(1, 2, 1)
+    plt.imshow(img)
+    plt.title('Original')
+    plt.axis('image')
+
+    fig.add_subplot(1, 2, 2)
+    plt.imshow(dsImg)
+    plt.title('downsampled 4:2:0 sx = 0.5, sy = 0.5')
+    plt.axis('image')
+    plt.show()
+
+    print()
+    print("Downsampling 4:2:0 using openCv with interpolation filter")
+    print()
+
+    dsImgInterp = cv2.resize(img, None, fx=scaleX, fy=scaleY, interpolation=cv2.INTER_LINEAR)
+
+    fig = plt.figure(figsize=(10, 10))
+    fig.add_subplot(1, 2, 1)
+    plt.imshow(img)
+    plt.title('Original')
+    plt.axis('image')
+
+    fig.add_subplot(1, 2, 2)
+    plt.imshow(dsImgInterp)
+    plt.title('downsampled 4:2:0 sx = 0.5, sy = 0.5 interpolated')
+    plt.axis('image')
+    plt.show()
+
+    print()
+    print("Upsampling with repetitions")
+    print()
+
+    fig = plt.figure(figsize=(20, 20))
+
+    usImg = np.repeat(dsImg, stepX, axis=1)
+    l, c = usImg.shape
+    usImg = np.repeat(usImg, stepY, axis=0)
+
+    fig.add_subplot(1, 4, 1)
+    plt.imshow(img)
+    plt.title('original')
+    plt.axis('image')
+
+    fig.add_subplot(1, 4, 2)
+    plt.imshow(dsImg)
+    plt.title('downsampled 4:2:0 no interp')
+    plt.axis('image')
+
+    fig.add_subplot(1, 4, 3)
+    plt.imshow(usImg)
+    plt.title('upsampled with repetitions')
+    plt.axis('image')
+    plt.show()
+
+    print()
+    print("dsImg size = ", dsImg.shape)
+    print("usImg size = ", usImg.shape)
+
+    print()
+    print("Upsampling with interpolation")
+    print()
+
+    fig = plt.figure(figsize=(20, 20))
+
+    usImg = cv2.resize(dsImg, None, fx=stepX, fy=stepY, interpolation=cv2.INTER_LINEAR)
+    fig.add_subplot(1, 4, 1)
+    plt.imshow(img)
+    plt.title('original')
+    plt.axis('image')
+
+    fig.add_subplot(1, 4, 2)
+    plt.imshow(dsImg)
+    plt.title('downsampled 4:2:0 no interp')
+    plt.axis('image')
+
+    fig.add_subplot(1, 4, 3)
+    plt.imshow(usImg)
+    plt.title('upsampled with interpolation')
+    plt.axis('image')
+    plt.show()
+
+    print()
+    print("dsImg size = ", dsImg.shape)
+    print("usImg size = ", usImg.shape)
+
+    return dsImg
+
+
+def DCT(img):
+    cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
+
+    dctImg = fft.dct(fft.dct(img, norm="ortho").T, norm="ortho").T
+    dctLogImg = np.log(np.abs(dctImg) + 0.0001)
+
+    fig = plt.figure(figsize=(20, 20))
+
+    fig.add_subplot(1, 3, 1)
+    plt.imshow(img, cm_grey)
+    plt.title('original')
+    plt.axis('image')
+
+    fig.add_subplot(1, 3, 2)
+    plt.imshow(dctImg, cm_grey)
+    plt.title('DCT')
+    plt.axis('image')
+
+    fig.add_subplot(1, 3, 3)
+    plt.imshow(dctLogImg, cm_grey)
+    plt.title('DCT log')
+    plt.axis('image')
+    plt.show()
+
+    invDctImg = fft.idct(fft.idct(dctImg, norm="ortho").T, norm="ortho").T
+
+    fig = plt.figure(figsize=(20, 20))
+
+    fig.add_subplot(1, 4, 1)
+    plt.imshow(img, cm_grey)
+    plt.title('original')
+    plt.axis('image')
+
+    fig.add_subplot(1, 4, 2)
+    plt.imshow(invDctImg, cm_grey)
+    plt.title('IDCT')
+    plt.axis('image')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    diffImg = img - invDctImg
+    diffImg[diffImg < 0.000001] = 0.
+
+    plt.imshow(diffImg, cm_grey)
+    plt.title('original - invDCT')
+    plt.axis('image')
+    plt.show()
+
+    return dctImg
+
+
+def dctBasisImg(img, d):
+
+    for l in range(0, d):
+        for k in range(0, d):
+            for i in range(0, d):
+                for j in range(0, d):
+                    u = d * k + j
+                    print(u)
+                    v = l * d + i
+                    img[v, u] = m.cos((2 * j + 1) * (2 * k) * m.pi / (4 * 8)) * m.cos(
+                        (2 * i + 1) * (2 * l) * m.pi / (4 * 8))
+
+    return img
+
+def DCT_block(img):
+    dct8x8 = dctBasisImg(img, 8)
+    cmBW = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1., 1., 1.)], 256)
+
+    fig = plt.figure(figsize=(10, 10))
+    plt.imshow(dct8x8, cmBW)
+    plt.axis('image')
+    plt.xticks([0, 8, 16, 24, 32, 40, 48, 56, 64])
+    plt.yticks([0, 8, 16, 24, 32, 40, 48, 56, 64])
+    plt.grid(which='both', linestyle='-', color='red')
+    plt.title("DCT Basis function 8x8")
+    plt.show()
+
+    # dct64x64 = dctBasisImg(img, 64)
+    # fig = plt.figure(figsize=(20, 20))
+    # plt.imshow(dct64x64, cmBW)
+    # plt.axis('image')
+    # plt.xticks(np.arange(0, 64 * 64, 64))
+    # plt.yticks(np.arange(0, 64 * 64, 64))
+    # plt.grid(which='both', linestyle='-', color='red')
+    # plt.title("DCT Basis function 64x64")
+    # plt.show()
 
 def visualizacao(img):
     # 3
@@ -98,7 +290,7 @@ def RGB2YCbCr(img):
     plt.axis('off')
     plt.show()
 
-    return transcol
+    return transcol, cbcr
 
 
 def getRGB(img):
@@ -261,7 +453,19 @@ def encoder(img):
     #4
     img = padding(img)
     #5
-    img = RGB2YCbCr(img)
+    img, cbcr = RGB2YCbCr(img)
+
+    y_d = downsample(cbcr[:, :, 0])
+    cb_d = downsample(cbcr[:, :, 1])
+    cr_d = downsample(cbcr[:, :, 2])
+
+    y_d = DCT(y_d)
+    cb_d = DCT(cb_d)
+    cr_d = DCT(cr_d)
+
+    DCT_block(y_d)
+    DCT_block(cb_d)
+    DCT_block(cr_d)
 
     return img
 
@@ -269,11 +473,11 @@ def encoder(img):
 def decoder(img, h, w):
     print('Decoding image')
     #5
-    img = YCbCr2RGb(img)
-    # 4
-    img = getImageOriginal(img, h, w)
-    # 3
-    img = getImage_inv(img)
+    # img = YCbCr2RGb(img)
+    # # 4
+    # img = getImageOriginal(img, h, w)
+    # # 3
+    # img = getImage_inv(img)
 
     return img
 
@@ -295,8 +499,9 @@ def main():
     img_enc = encoder(img[2])
     img_dec = decoder(img_enc, h, w)
     comparison = img[2] == img_dec
-    print(comparison.all())
-    print(img[2] ," \n A \n" , img_dec)
+    # print(comparison.all())
+    # print(img[2], " \n A \n", img_dec)
+
 
 if __name__ == '__main__':
     plt.close('all')
