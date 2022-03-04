@@ -16,7 +16,7 @@ colorlistGreen = ["black", "green"]
 colorlistBlue = ["black", "blue"]
 
 
-def downsample(img):
+def downsample(img, num):
 
     print("Downsampling 4:2:0 using no interpolation filter")
     print()
@@ -25,8 +25,12 @@ def downsample(img):
 
     stepX = int(1 // scaleX)
     stepY = int(1 // scaleY)
+    if(num == 420): #coisa bonita
+        dsImg = img[::stepY, ::stepX]
+    
+    elif(num == 422): #coisa bonita 
+        dsImg = img[::stepY,:]
 
-    dsImg = img[::stepY, ::stepX]
     fig = plt.figure(figsize=(10, 10))
     fig.add_subplot(1, 2, 1)
     plt.imshow(img)
@@ -35,13 +39,16 @@ def downsample(img):
 
     fig.add_subplot(1, 2, 2)
     plt.imshow(dsImg)
-    plt.title('downsampled 4:2:0 sx = 0.5, sy = 0.5')
+    if(num == 420): #coisa bonita
+        plt.title('downsampled 4:2:0 sx = 0.5, sy = 0.5')
+        
+    elif(num == 422): #coisa bonita 
+        plt.title('downsampled 4:2:2 sx = 0.5')
     plt.axis('image')
     plt.show()
 
-    print()
-    print("Downsampling 4:2:0 using openCv with interpolation filter")
-    print()
+    print("\nDownsampling 4:2:0 using openCv with interpolation filter\n")
+    
 
     dsImgInterp = cv2.resize(img, None, fx=scaleX, fy=scaleY, interpolation=cv2.INTER_LINEAR)
 
@@ -53,13 +60,15 @@ def downsample(img):
 
     fig.add_subplot(1, 2, 2)
     plt.imshow(dsImgInterp)
-    plt.title('downsampled 4:2:0 sx = 0.5, sy = 0.5 interpolated')
+    if(num == 420): #coisa bonita
+        plt.title('downsampled 4:2:0 sx = 0.5, sy = 0.5 interpolated')
+        
+    elif(num == 422): #coisa bonita 
+        plt.title('downsampled 4:2:2 sx = 0.5 interpolated')
     plt.axis('image')
     plt.show()
 
-    print()
-    print("Upsampling with repetitions")
-    print()
+    print("\nUpsampling with repetitions\n")
 
     fig = plt.figure(figsize=(20, 20))
 
@@ -74,7 +83,11 @@ def downsample(img):
 
     fig.add_subplot(1, 4, 2)
     plt.imshow(dsImg)
-    plt.title('downsampled 4:2:0 no interp')
+    if(num == 420): #coisa bonita
+        plt.title('downsampled 4:2:0 sx = 0.5, sy = 0.5  no interp')
+        
+    elif(num == 422): #coisa bonita 
+        plt.title('downsampled 4:2:2 sx = 0.5 no interp')
     plt.axis('image')
 
     fig.add_subplot(1, 4, 3)
@@ -83,13 +96,10 @@ def downsample(img):
     plt.axis('image')
     plt.show()
 
-    print()
     print("dsImg size = ", dsImg.shape)
     print("usImg size = ", usImg.shape)
 
-    print()
     print("Upsampling with interpolation")
-    print()
 
     fig = plt.figure(figsize=(20, 20))
 
@@ -101,7 +111,11 @@ def downsample(img):
 
     fig.add_subplot(1, 4, 2)
     plt.imshow(dsImg)
-    plt.title('downsampled 4:2:0 no interp')
+    if(num == 420): #coisa bonita
+        plt.title('downsampled 4:2:0 no interp')
+        
+    elif(num == 422): #coisa bonita 
+        plt.title('downsampled 4:2:2 no interp')
     plt.axis('image')
 
     fig.add_subplot(1, 4, 3)
@@ -174,11 +188,12 @@ def dctBasisImg(img, d):
         for k in range(0, d):
             for i in range(0, d):
                 for j in range(0, d):
-                    u = d * k + j
+                    u = d * k + j 
                     print(u)
-                    v = l * d + i
+                    v = l * d + i 
                     img[v, u] = m.cos((2 * j + 1) * (2 * k) * m.pi / (4 * 8)) * m.cos(
                         (2 * i + 1) * (2 * l) * m.pi / (4 * 8))
+
 
     return img
 
@@ -455,9 +470,9 @@ def encoder(img):
     #5
     img, cbcr = RGB2YCbCr(img)
 
-    y_d = downsample(cbcr[:, :, 0])
-    cb_d = downsample(cbcr[:, :, 1])
-    cr_d = downsample(cbcr[:, :, 2])
+    y_d = downsample(cbcr[:, :, 0],422)
+    cb_d = downsample(cbcr[:, :, 1],422)
+    cr_d = downsample(cbcr[:, :, 2],422)
 
     y_d = DCT(y_d)
     cb_d = DCT(cb_d)
