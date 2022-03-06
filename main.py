@@ -16,6 +16,7 @@ colorlistGreen = ["black", "green"]
 colorlistBlue = ["black", "blue"]
 
 
+
 def downsample(img, num):
 
     print("Downsampling 4:2:0 using no interpolation filter")
@@ -183,14 +184,21 @@ def DCT(img):
 
 
 def dctBasisImg(img, d):
-
-    for l in range(0, d):
-        for k in range(0, d):
+    w, h = img.shape
+    d1 = w//d 
+    d2 = h//d 
+    
+    for l in range(0, d1):
+        for k in range(0, d2):
             for i in range(0, d):
                 for j in range(0, d):
                     u = d * k + j 
-                    print(u)
+                    # if(u>=img.shape[1]):
+                    #     u = u%d;
+                    #print(u)
                     v = l * d + i 
+                    # if(v>= img.shape[0]):
+                    #     v = v%d;
                     img[v, u] = m.cos((2 * j + 1) * (2 * k) * m.pi / (4 * 8)) * m.cos(
                         (2 * i + 1) * (2 * l) * m.pi / (4 * 8))
 
@@ -204,21 +212,44 @@ def DCT_block(img):
     fig = plt.figure(figsize=(10, 10))
     plt.imshow(dct8x8, cmBW)
     plt.axis('image')
-    plt.xticks([0, 8, 16, 24, 32, 40, 48, 56, 64])
-    plt.yticks([0, 8, 16, 24, 32, 40, 48, 56, 64])
+    plt.xticks(np.arange(0,img.shape[1],8))
+    plt.yticks(np.arange(0, img.shape[0], 8))
     plt.grid(which='both', linestyle='-', color='red')
     plt.title("DCT Basis function 8x8")
     plt.show()
-
-    # dct64x64 = dctBasisImg(img, 64)
-    # fig = plt.figure(figsize=(20, 20))
-    # plt.imshow(dct64x64, cmBW)
-    # plt.axis('image')
-    # plt.xticks(np.arange(0, 64 * 64, 64))
-    # plt.yticks(np.arange(0, 64 * 64, 64))
-    # plt.grid(which='both', linestyle='-', color='red')
-    # plt.title("DCT Basis function 64x64")
-    # plt.show()
+    
+    # n = 64
+    # height1, width1 = img.shape
+    
+    # if (height1 % n) != 0:
+    #     resto = n - height1 % n
+    #     print(resto, "resto", height1,width1)
+    #     img = np.pad(img, ((0, resto), (0, 0)), mode="edge")
+    # resto = 0
+    # if (width1 % n) != 0:
+    #     resto = n - width1 % n
+    #     print(resto, "resto", height1, width1)
+    #     img = np.pad(img, ((0, 0), (0, resto)), mode="edge")
+    #     resto = 0
+    # height1, width1 = img.shape
+    # if(height1 < width1):
+    #     resto = width1-height1
+    #     img = np.pad(img, ((0, resto), (0, 0)), mode="edge")
+    # elif(width1 < height1):
+    #     resto = height1-width1
+    #     img = np.pad(img, ((0, 0), (0, resto)), mode="edge")
+        
+           
+    # print(img.shape, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    dct64x64 = dctBasisImg(img, 64)
+    fig = plt.figure(figsize=(20, 20))
+    plt.imshow(dct64x64, cmBW)
+    plt.axis('image')
+    plt.xticks(np.arange(0, img.shape[1], 64))
+    plt.yticks(np.arange(0, img.shape[0], 64))
+    plt.grid(which='both', linestyle='-', color='red')
+    plt.title("DCT Basis function 64x64")
+    plt.show()
 
 def visualizacao(img):
     # 3
@@ -406,8 +437,8 @@ def padding(img):
     #     width = img.shape[1]
     R, G, B = getRGB(img)
 
-    if (height % 16) != 0:
-        resto = 16 - height % 16
+    if (height %16) != 0:
+        resto = 16- height % 16
 
         # rowR = R[-1, :]
         # rowG = G[-1, :]
@@ -470,9 +501,9 @@ def encoder(img):
     #5
     img, cbcr = RGB2YCbCr(img)
 
-    y_d = downsample(cbcr[:, :, 0],422)
-    cb_d = downsample(cbcr[:, :, 1],422)
-    cr_d = downsample(cbcr[:, :, 2],422)
+    y_d = downsample(cbcr[:, :, 0],420)
+    cb_d = downsample(cbcr[:, :, 1],420)
+    cr_d = downsample(cbcr[:, :, 2],420)
 
     y_d = DCT(y_d)
     cb_d = DCT(cb_d)
@@ -505,15 +536,15 @@ def main():
     img[1] = plt.imread('logo.bmp')
     img[2] = plt.imread('barn_mountains.bmp')
 
-    h, w, c = img[2].shape
+    h, w, c = img[0].shape
 
     plt.figure()
-    plt.imshow(img[2])
+    plt.imshow(img[0])
     plt.show()
 
-    img_enc = encoder(img[2])
+    img_enc = encoder(img[0])
     img_dec = decoder(img_enc, h, w)
-    comparison = img[2] == img_dec
+    comparison = img[0] == img_dec
     # print(comparison.all())
     # print(img[2], " \n A \n", img_dec)
 
