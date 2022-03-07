@@ -9,6 +9,13 @@ import matplotlib.colors as clr
 import cv2
 import scipy.fftpack as fft
 import math as m
+from numpy import pi
+from numpy import sin
+from numpy import zeros
+from numpy import r_
+from scipy import signal
+from scipy import misc # pip install Pillow
+import matplotlib.pylab as pylab
 
 colorlist = ["gold", "red"]
 colorlistRed = ["black", "red"]
@@ -19,13 +26,8 @@ colorlistBlue = ["black", "blue"]
 
 def downsample(img, num):
 
-    print("Downsampling 4:2:0 using no interpolation filter")
-    print()
-    scaleX = 0.5
-    scaleY = 0.5
-
-    stepX = int(1 // scaleX)
-    stepY = int(1 // scaleY)
+    stepX = 2
+    stepY = 2
     if(num == 420): #coisa bonita
         dsImg = img[::stepY, ::stepX]
     
@@ -51,7 +53,7 @@ def downsample(img, num):
     print("\nDownsampling 4:2:0 using openCv with interpolation filter\n")
     
 
-    dsImgInterp = cv2.resize(img, None, fx=scaleX, fy=scaleY, interpolation=cv2.INTER_LINEAR)
+    dsImgInterp = cv2.resize(img, None, fx=1/stepX, fy=1/stepY, interpolation=cv2.INTER_LINEAR)
 
     fig = plt.figure(figsize=(10, 10))
     fig.add_subplot(1, 2, 1)
@@ -138,84 +140,91 @@ def DCT(img):
     dctImg = fft.dct(fft.dct(img, norm="ortho").T, norm="ortho").T
     dctLogImg = np.log(np.abs(dctImg) + 0.0001)
 
-    fig = plt.figure(figsize=(20, 20))
+    # fig = plt.figure(figsize=(20, 20))
 
-    fig.add_subplot(1, 3, 1)
-    plt.imshow(img, cm_grey)
-    plt.title('original')
-    plt.axis('image')
+    # fig.add_subplot(1, 3, 1)
+    # plt.imshow(img, cm_grey)
+    # plt.title('original')
+    # plt.axis('image')
 
-    fig.add_subplot(1, 3, 2)
-    plt.imshow(dctImg, cm_grey)
-    plt.title('DCT')
-    plt.axis('image')
+    # fig.add_subplot(1, 3, 2)
+    # plt.imshow(dctImg, cm_grey)
+    # plt.title('DCT')
+    # plt.axis('image')
 
-    fig.add_subplot(1, 3, 3)
-    plt.imshow(dctLogImg, cm_grey)
-    plt.title('DCT log')
-    plt.axis('image')
-    plt.show()
+    # fig.add_subplot(1, 3, 3)
+    # plt.imshow(dctLogImg, cm_grey)
+    # plt.title('DCT log')
+    # plt.axis('image')
+    # plt.show()
 
     invDctImg = fft.idct(fft.idct(dctImg, norm="ortho").T, norm="ortho").T
 
     fig = plt.figure(figsize=(20, 20))
 
-    fig.add_subplot(1, 4, 1)
-    plt.imshow(img, cm_grey)
-    plt.title('original')
-    plt.axis('image')
+    # fig.add_subplot(1, 4, 1)
+    # plt.imshow(img, cm_grey)
+    # plt.title('original')
+    # plt.axis('image')
 
-    fig.add_subplot(1, 4, 2)
-    plt.imshow(invDctImg, cm_grey)
-    plt.title('IDCT')
-    plt.axis('image')
-    plt.show()
+    # fig.add_subplot(1, 4, 2)
+    # plt.imshow(invDctImg, cm_grey)
+    # plt.title('IDCT')
+    # plt.axis('image')
+    # plt.show()
 
-    fig = plt.figure(figsize=(5, 5))
-    diffImg = img - invDctImg
-    diffImg[diffImg < 0.000001] = 0.
+    # fig = plt.figure(figsize=(5, 5))
+    # diffImg = img - invDctImg
+    # diffImg[diffImg < 0.000001] = 0.
 
-    plt.imshow(diffImg, cm_grey)
-    plt.title('original - invDCT')
-    plt.axis('image')
-    plt.show()
+    # plt.imshow(diffImg, cm_grey)
+    # plt.title('original - invDCT')
+    # plt.axis('image')
+    # plt.show()
 
     return dctImg
 
 
 def dctBasisImg(img, d):
-    w, h = img.shape
-    d1 = w//d 
-    d2 = h//d 
+    w, h, c = img.shape
     
-    for l in range(0, d1):
-        for k in range(0, d2):
-            for i in range(0, d):
-                for j in range(0, d):
-                    u = d * k + j 
-                    # if(u>=img.shape[1]):
-                    #     u = u%d;
-                    #print(u)
-                    v = l * d + i 
-                    # if(v>= img.shape[0]):
-                    #     v = v%d;
-                    img[v, u] = m.cos((2 * j + 1) * (2 * k) * m.pi / (4 * 8)) * m.cos(
-                        (2 * i + 1) * (2 * l) * m.pi / (4 * 8))
+    imsize = img.shape
+    dct = np.zeros(imsize)
+    
+    for i in r_[:imsize[0]:d]:
+        for j in r_[:imsize[1]:d]:
+            dct[i:(i+8),j:(j+8)] = dct2( img[i:(i+8),j:(j+8)] )
+            
+    plt.figure()
+    plt.imshow(dct,cmap='gray',vmax = np.max(dct)*0.01,vmin = 0)
+    plt.title( "8x8 DCTs of the image")
+    # for l in range(0, d1):
+    #     for k in range(0, d2):
+    #         for i in range(0, d):
+    #             for j in range(0, d):1
+    #                 u = d * k + j 
+    #                 # if(u>=img.shape[1]):
+    #                 #     u = u%d;
+    #                 #print(u)
+    #                 v = l * d + i 
+    #                 # if(v>= img.shape[0]):
+    #                 #     v = v%d;
+    #                 img[v, u] = m.cos((2 * j + 1) * (2 * k) * m.pi / (4 * 8)) * m.cos(
+    #                     (2 * i + 1) * (2 * l) * m.pi / (4 * 8))
 
 
-    return img
+    return imsize
+
+def dct2(a):
+    return fft.dct( fft.dct( a, axis=0, norm='ortho' ), axis=1, norm='ortho' )
 
 def DCT_block(img):
     dct8x8 = dctBasisImg(img, 8)
     cmBW = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1., 1., 1.)], 256)
 
     fig = plt.figure(figsize=(10, 10))
-    plt.imshow(dct8x8, cmBW)
-    plt.axis('image')
-    plt.xticks(np.arange(0,img.shape[1],8))
-    plt.yticks(np.arange(0, img.shape[0], 8))
-    plt.grid(which='both', linestyle='-', color='red')
-    plt.title("DCT Basis function 8x8")
+    plt.imshow(dct8x8[:,:,0], cmBW)
+
     plt.show()
     
     # n = 64
@@ -243,12 +252,7 @@ def DCT_block(img):
     # print(img.shape, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     dct64x64 = dctBasisImg(img, 64)
     fig = plt.figure(figsize=(20, 20))
-    plt.imshow(dct64x64, cmBW)
-    plt.axis('image')
-    plt.xticks(np.arange(0, img.shape[1], 64))
-    plt.yticks(np.arange(0, img.shape[0], 64))
-    plt.grid(which='both', linestyle='-', color='red')
-    plt.title("DCT Basis function 64x64")
+
     plt.show()
 
 def visualizacao(img):
@@ -505,9 +509,8 @@ def encoder(img):
     cb_d = downsample(cbcr[:, :, 1],420)
     cr_d = downsample(cbcr[:, :, 2],420)
 
-    y_d = DCT(y_d)
-    cb_d = DCT(cb_d)
-    cr_d = DCT(cr_d)
+    y_d = DCT(img)
+    
 
     DCT_block(y_d)
     DCT_block(cb_d)
@@ -536,15 +539,15 @@ def main():
     img[1] = plt.imread('logo.bmp')
     img[2] = plt.imread('barn_mountains.bmp')
 
-    h, w, c = img[2].shape
+    h, w, c = img[1].shape
 
     plt.figure()
-    plt.imshow(img[2])
+    plt.imshow(img[1])
     plt.show()
 
-    img_enc = encoder(img[2])
+    img_enc = encoder(img[1])
     img_dec = decoder(img_enc, h, w)
-    comparison = img[2] == img_dec
+    comparison = img[1] == img_dec
     # print(comparison.all())
     # print(img[2], " \n A \n", img_dec)
 
