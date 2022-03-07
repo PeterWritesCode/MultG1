@@ -536,15 +536,15 @@ def main():
     img[1] = plt.imread('logo.bmp')
     img[2] = plt.imread('barn_mountains.bmp')
 
-    h, w, c = img[0].shape
+    h, w, c = img[2].shape
 
     plt.figure()
-    plt.imshow(img[0])
+    plt.imshow(img[2])
     plt.show()
 
-    img_enc = encoder(img[0])
+    img_enc = encoder(img[2])
     img_dec = decoder(img_enc, h, w)
-    comparison = img[0] == img_dec
+    comparison = img[2] == img_dec
     # print(comparison.all())
     # print(img[2], " \n A \n", img_dec)
 
