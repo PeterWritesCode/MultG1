@@ -186,8 +186,7 @@ def DCT(img):
 
 
 def dctBasisImg(img, d):
-    w, h, c = img.shape
-    
+
     imsize = img.shape
     dct = np.zeros(imsize)
     
@@ -195,9 +194,7 @@ def dctBasisImg(img, d):
         for j in r_[:imsize[1]:d]:
             dct[i:(i+8),j:(j+8)] = dct2( img[i:(i+8),j:(j+8)] )
             
-    plt.figure()
-    plt.imshow(dct,cmap='gray',vmax = np.max(dct)*0.01,vmin = 0)
-    plt.title( "8x8 DCTs of the image")
+    
     # for l in range(0, d1):
     #     for k in range(0, d2):
     #         for i in range(0, d):
@@ -213,7 +210,7 @@ def dctBasisImg(img, d):
     #                     (2 * i + 1) * (2 * l) * m.pi / (4 * 8))
 
 
-    return imsize
+    return dct
 
 def dct2(a):
     return fft.dct( fft.dct( a, axis=0, norm='ortho' ), axis=1, norm='ortho' )
@@ -221,12 +218,9 @@ def dct2(a):
 def DCT_block(img):
     dct8x8 = dctBasisImg(img, 8)
     cmBW = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1., 1., 1.)], 256)
-
-    fig = plt.figure(figsize=(10, 10))
-    plt.imshow(dct8x8[:,:,0], cmBW)
-
-    plt.show()
-    
+    plt.figure()
+    plt.imshow(dct8x8,cmap='gray',vmax = np.max(dct8x8)*0.01,vmin = 0)
+    plt.title( "8x8 DCTs of the image")
     # n = 64
     # height1, width1 = img.shape
     
@@ -251,9 +245,7 @@ def DCT_block(img):
            
     # print(img.shape, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     dct64x64 = dctBasisImg(img, 64)
-    fig = plt.figure(figsize=(20, 20))
-
-    plt.show()
+   
 
 def visualizacao(img):
     # 3
@@ -539,15 +531,15 @@ def main():
     img[1] = plt.imread('logo.bmp')
     img[2] = plt.imread('barn_mountains.bmp')
 
-    h, w, c = img[1].shape
+    h, w, c = img[2].shape
 
     plt.figure()
-    plt.imshow(img[1])
+    plt.imshow(img[2])
     plt.show()
 
-    img_enc = encoder(img[1])
+    img_enc = encoder(img[2])
     img_dec = decoder(img_enc, h, w)
-    comparison = img[1] == img_dec
+    comparison = img[2] == img_dec
     # print(comparison.all())
     # print(img[2], " \n A \n", img_dec)
 
