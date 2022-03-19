@@ -186,7 +186,7 @@ def DCT(img):
 def dctBasisImg(img, d):
     w, h = img.shape
     d1 = w//d 
-    d2 = h//d 
+    d2 = h//d
     
     for l in range(0, d1):
         for k in range(0, d2):
@@ -501,9 +501,9 @@ def encoder(img):
     #5
     img, cbcr = RGB2YCbCr(img)
 
-    y_d = downsample(cbcr[:, :, 0],420)
-    cb_d = downsample(cbcr[:, :, 1],420)
-    cr_d = downsample(cbcr[:, :, 2],420)
+    y_d = downsample(cbcr[:, :, 0], 420)
+    cb_d = downsample(cbcr[:, :, 1], 420)
+    cr_d = downsample(cbcr[:, :, 2], 420)
 
     y_d = DCT(y_d)
     cb_d = DCT(cb_d)
@@ -519,11 +519,11 @@ def encoder(img):
 def decoder(img, h, w):
     print('Decoding image')
     #5
-    # img = YCbCr2RGb(img)
-    # # 4
-    # img = getImageOriginal(img, h, w)
-    # # 3
-    # img = getImage_inv(img)
+    img = YCbCr2RGb(img)
+    # 4
+    img = getImageOriginal(img, h, w)
+    # 3
+    img = getImage_inv(img)
 
     return img
 
@@ -544,7 +544,7 @@ def main():
 
     img_enc = encoder(img[2])
     img_dec = decoder(img_enc, h, w)
-    comparison = img[2] == img_dec
+    # comparison = img[2] == img_dec
     # print(comparison.all())
     # print(img[2], " \n A \n", img_dec)
 
