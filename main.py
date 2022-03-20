@@ -20,9 +20,9 @@ colorlistBlue = ["black", "blue"]
 def downsample_inter(img_in, num):
     w, h, c = img_in.shape
     if num == 420:
-        img_out = np.zeros((w//2, h//2, 3), dtype=np.uint8)
+        img_out = np.zeros((w//2, h//2, 3))
     elif num == 422:
-        img_out = np.zeros((w//2, h, 3), dtype=np.uint8)
+        img_out = np.zeros((w//2, h, 3))
     for i in range(3):
         img = img_in[:, :, i]
         stepX = 2
@@ -61,9 +61,9 @@ def downsample_inter(img_in, num):
 def upsample_rep(img_in, num):
     w, h, c = img_in.shape
     if num == 420:
-        img_out = np.zeros((w * 2, h * 2, 3), dtype=np.uint8)
+        img_out = np.zeros((w * 2, h * 2, 3))
     elif num == 422:
-        img_out = np.zeros((w * 2, h, 3), dtype=np.uint8)
+        img_out = np.zeros((w * 2, h, 3))
     for i in range(3):
         dsImg = img_in[:, :, i]
         stepX = 2
@@ -101,9 +101,9 @@ def upsample_rep(img_in, num):
 def upsample_inter(img_in, num):
     w, h, c = img_in.shape
     if num == 420:
-        img_out = np.zeros((w * 2, h * 2, 3), dtype=np.uint8)
+        img_out = np.zeros((w * 2, h * 2, 3))
     elif num == 422:
-        img_out = np.zeros((w * 2, h, 3), dtype=np.uint8)
+        img_out = np.zeros((w * 2, h, 3))
     for i in range(3):
         dsImg = img_in[:, :, i]
         stepX = 2
@@ -140,9 +140,9 @@ def upsample_inter(img_in, num):
 def downsample_nointer(img_in, num):
     w, h, c = img_in.shape
     if num == 420:
-        img_out = np.zeros((w//2, h//2, 3), dtype=np.uint8)
+        img_out = np.zeros((w//2, h//2, 3))
     elif num == 422:
-        img_out = np.zeros((w//2, h, 3), dtype=np.uint8)
+        img_out = np.zeros((w//2, h, 3))
     for i in range(3):
         img = img_in[:, :, i]
         stepX = 2
@@ -375,7 +375,7 @@ def reverseQuantization(img,qFactor):
         img_out[:,:,k] = unQuantizedImg
         
         plt.figure(figsize=(20, 20))
-        plt.imshow(np.log(np.abs(unQuantizedImg)+0.0001), cmBW)
+        plt.imshow(np.log(np.abs(unQuantizedImg)+0.0001),cmBW)
         stringTitle = "Channel:" + str(k) + " UnQuantized with Quality of: " + str(qFactor)
         plt.title(stringTitle)
     return img_out
@@ -401,7 +401,7 @@ def quantization(img, qFactor):
         img_out[:,:,k] = quantizedImg
         
         plt.figure(figsize=(20, 20))
-        plt.imshow(np.log(np.abs(quantizedImg)+0.0001), cmBW)
+        plt.imshow(np.log(np.abs(quantizedImg)+0.0001),cmBW)
         stringTitle = "Channel:" + str(k) + " Quantized with Quality of: " + str(qFactor)
         plt.title(stringTitle)
     return img_out
@@ -439,8 +439,12 @@ def DCdpcm(img,flag):
         img_out[:,:,k] = imgChannel
         
         plt.figure(figsize=(20, 20))
-        plt.imshow(np.log(np.abs(imgChannel)+0.0001), cmBW)
-        stringTitle = "Channel:" + str(k) + " DPCM'd "
+        plt.imshow(np.log(np.abs(imgChannel)+0.0001),cmBW)
+        if(flag):
+            stringTitle = "Channel:" + str(k) + " DPCM'd "
+        else:
+            stringTitle = "Channel:" + str(k) + " un- DPCM'd "
+        
         plt.title(stringTitle)
         
     return img_out
@@ -685,8 +689,7 @@ def getImageOriginal(img, height, width):
 
     return img
 
-
-def encoder(img, tc, ratio):
+def encoder(img, tc, ratio, qFactor):
     print('Encoding image')
     # 2
     img = visualizacao(img)
@@ -700,42 +703,32 @@ def encoder(img, tc, ratio):
     cbcr = downsample_nointer(cbcr, ratio)
 
     imgDct = DCT(cbcr)
-    
 
     dct8x8, dct64x64 = DCT_block(cbcr)
-    quantizedImg = quantization(dct8x8,50)
-    dpcmImg = DCdpcm(quantizedImg,True)
-    
-    
-    
 
-    
-    
-    return img, cbcr, cbcr_inter, dct64x64, dct8x8, imgDct, dpcmImg
+    quantizedImg = quantization(dct8x8, qFactor)
+
+    dpcmImg = DCdpcm(quantizedImg, True)
+
+    return cbcr_inter, dct64x64, imgDct, dpcmImg
 
 
-def decoder(img, cbcr, cbcr_inter, dct64x64, dct8x8, h, w, tc, ratio, dpcmImg):
+def decoder(cbcr_inter, dct64x64, imgDct, dpcmImg, h, w, tc, ratio, qFactor):
     print('Decoding image')
-    
-    reverseDpcm = reverseQuantization(dpcmImg, 50)
-    blockedOut = idctBlocks(reverseDpcm,8)
-    
+
+    dpcmInversa = DCdpcm(dpcmImg,False)
+    reverseDpcm = reverseQuantization(dpcmInversa, qFactor)
+
+    blockedOut = idctBlocks(reverseDpcm, 8)
+
     idctBlocks(dct64x64, 64)
-    idctBlocks1 = idctBlocks(dct8x8,8)
-    
-    comparison = cbcr == idctBlocks1
-    
+
+    iDCT(imgDct)
+
     cbcr_inter = upsample_inter(cbcr_inter, ratio)
 
-    cbcr = upsample_rep(cbcr, ratio)
-    # reverse = reverseQuantization(quantizedImg,95)
-    # idctBlocks(reverse,8)
-    
-    
-    print(comparison)
-    
-    idctBlocks3 = upsample_inter(idctBlocks1,ratio)
-    
+    idctBlocks3 = upsample_rep(blockedOut, ratio)
+
     # 5
     img = YCbCr2RGb(idctBlocks3, tc)
     # 4
@@ -765,14 +758,13 @@ def main():
     tc = np.array([[0.299, 0.587, 0.114],
                    [-0.168736, -0.331264, 0.5],
                    [0.5, -0.418688, -0.081312]])
-
+    qFactor = 75
     dsusRatio = 420
-    img_enc, cbcr, cbcr_inter,dct64x64, dct8x8, imgDct, dpcmImg = encoder(img_in, tc, dsusRatio)
-    img_dec = decoder(img_enc, cbcr, cbcr_inter,dct64x64, dct8x8, h, w, tc, dsusRatio)
+    cbcr_inter, dct64x64, imgDct, dpcmImg = encoder(img_in, tc, dsusRatio, qFactor)
+    img_dec = decoder(cbcr_inter, dct64x64, imgDct, dpcmImg, h, w, tc, dsusRatio, qFactor)
     # comparison = img[1] == img_dec
     # print(comparison.all())
     # print(img[2], " \n A \n", img_dec)
-
 
 if __name__ == '__main__':
     plt.close('all')
