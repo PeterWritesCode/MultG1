@@ -19,32 +19,25 @@ colorlistBlue = ["black", "blue"]
 
 def downsample_inter(img_in, num):
     w, h, c = img_in.shape
+    
+    cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
     if num == 420:
-        img_out = np.zeros((w//2, h//2, 3))
+        img_out = np.zeros((w//2, h//2, 2))
     elif num == 422:
-        img_out = np.zeros((w//2, h, 3))
-    for i in range(3):
+        img_out = np.zeros((w, h//2, 2))
+    for i in range(2):
         img = img_in[:, :, i]
         stepX = 2
         stepY = 2
         if num == 420:  # coisa bonita
-            dsImg = img[::stepY, ::stepX]
+            dsImgInterp = cv2.resize(img, None, fx=1 / stepX, fy=1 / stepY, interpolation=cv2.INTER_LINEAR)
 
         elif num == 422:  # coisa bonita
-            dsImg = img[::stepY, :]
+            dsImgInterp = cv2.resize(img, None, fx=1 / stepX, fy=1, interpolation=cv2.INTER_LINEAR)
 
         # print("\nDownsampling 4:2:0 using openCv with interpolation filter\n")
 
-        dsImgInterp = cv2.resize(img, None, fx=1 / stepX, fy=1 / stepY, interpolation=cv2.INTER_LINEAR)
-
-        fig = plt.figure(figsize=(10, 10))
-        fig.add_subplot(1, 2, 1)
-        plt.imshow(img)
-        plt.title('Original')
-        plt.axis('image')
-
-        fig.add_subplot(1, 2, 2)
-        plt.imshow(dsImgInterp)
+        plt.imshow(dsImgInterp,cm_grey)
         if num == 420:  # coisa bonita
             plt.title('downsampled 4:2:0 sx = 0.5, sy = 0.5 interpolated')
 
@@ -60,11 +53,13 @@ def downsample_inter(img_in, num):
 
 def upsample_rep(img_in, num):
     w, h, c = img_in.shape
+    
+    cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
     if num == 420:
-        img_out = np.zeros((w * 2, h * 2, 3))
+        img_out = np.zeros((w * 2, h * 2, 2))
     elif num == 422:
-        img_out = np.zeros((w * 2, h, 3))
-    for i in range(3):
+        img_out = np.zeros((w, h*2, 2))
+    for i in range(2):
         dsImg = img_in[:, :, i]
         stepX = 2
         stepY = 2
@@ -81,12 +76,12 @@ def upsample_rep(img_in, num):
             l, c = usImg.shape
 
         fig.add_subplot(1, 2, 1)
-        plt.imshow(dsImg)
+        plt.imshow(dsImg,cm_grey)
         plt.title('downsampled')
         plt.axis('image')
 
         fig.add_subplot(1, 2, 2)
-        plt.imshow(usImg)
+        plt.imshow(usImg,cm_grey)
         plt.title('upsampled with repetitions')
         plt.axis('image')
         plt.show()
@@ -100,31 +95,28 @@ def upsample_rep(img_in, num):
 
 def upsample_inter(img_in, num):
     w, h, c = img_in.shape
+    
+    cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
     if num == 420:
-        img_out = np.zeros((w * 2, h * 2, 3))
+        img_out = np.zeros((w * 2, h * 2, 2))
     elif num == 422:
-        img_out = np.zeros((w * 2, h, 3))
-    for i in range(3):
+        img_out = np.zeros((w , h* 2, 2))
+    for i in range(2):
         dsImg = img_in[:, :, i]
         stepX = 2
         stepY = 2
 
         # print("Upsampling with interpolation")
 
-        fig = plt.figure(figsize=(20, 20))
+
         if num == 420:
             usImg = cv2.resize(dsImg, None, fx=stepX, fy=stepY,
                                interpolation=cv2.INTER_LINEAR)
         elif num == 422:  # coisa bonita
             usImg = cv2.resize(dsImg, None, fx=stepX, fy=1,
                                interpolation=cv2.INTER_LINEAR)
-        fig.add_subplot(1, 2, 1)
-        plt.imshow(dsImg)
-        plt.title('downsampled')
-        plt.axis('image')
 
-        fig.add_subplot(1, 2, 2)
-        plt.imshow(usImg)
+        plt.imshow(usImg,cm_grey)
         plt.title('upsampled with interpolation')
         plt.axis('image')
         plt.show()
@@ -139,11 +131,13 @@ def upsample_inter(img_in, num):
 
 def downsample_nointer(img_in, num):
     w, h, c = img_in.shape
+    
+    cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
     if num == 420:
-        img_out = np.zeros((w//2, h//2, 3))
+        img_out = np.zeros((w//2, h//2, 2))
     elif num == 422:
-        img_out = np.zeros((w//2, h, 3))
-    for i in range(3):
+        img_out = np.zeros((w, h//2, 2))
+    for i in range(2):
         img = img_in[:, :, i]
         stepX = 2
         stepY = 2
@@ -151,14 +145,14 @@ def downsample_nointer(img_in, num):
         # print("\nDownsampling 4:2:0 using openCv with interpolation filter\n")
 
         if num == 420:  # coisa bonita
-            dsImg = img[::stepY, ::stepX]
+            dsImg = img[::stepX, ::stepY]
 
         elif num == 422:  # coisa bonita
-            dsImg = img[::stepY, :]
+            dsImg = img[:, ::stepX]
 
         fig = plt.figure(figsize=(10, 10))
         fig.add_subplot(1, 2, 1)
-        plt.imshow(img)
+        plt.imshow(img,cm_grey)
         plt.title('Original')
         plt.axis('image')
 
@@ -173,7 +167,7 @@ def downsample_nointer(img_in, num):
         # plt.show()
 
         fig.add_subplot(1, 2, 2)
-        plt.imshow(dsImg)
+        plt.imshow(dsImg,cm_grey)
         if num == 420:  # coisa bonita
             plt.title('downsampled 4:2:0 sx = 0.5, sy = 0.5  no interp')
 
@@ -185,16 +179,26 @@ def downsample_nointer(img_in, num):
     return img_out
 
 
-def DCT(img_in):
-    w, h, c = img_in.shape
-    img_out = np.zeros((w,h, 3))
-    for i in range(c):
-        img = img_in[:, :, i]
+def DCT(yin, cbcrin):
+    w, h, c = cbcrin.shape
+    cbcrout = np.zeros((w,h,2))
+    for i in range(3):
+        if(i==0):
+            img = yin
+            w, h = img.shape
+            yout = np.zeros((w,h))
+        else:
+            img_in = cbcrin
+            img = img_in[:, :, i]
+            w, h, c = img_in.shape
         cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
     
         dctImg = dct2(img)
         # print(dctImg)
-        img_out[:,:,i] = dctImg
+        if(i==0):
+            yout = dctImg 
+        else:
+            cbcrout[:,:,i-1] = dctImg
         dctLogImg = np.log(np.abs(dctImg) + 0.0001)
     
         fig = plt.figure(figsize=(20, 20))
@@ -210,41 +214,72 @@ def DCT(img_in):
         plt.show()
 
         
-    print(img_out)
-    return img_out
+    
+    return yout, cbcrout
 
 
-def iDCT(img_in):
-    w, h, c = img_in.shape
-    img_out = np.zeros((w,h, 3))
-    for i in range(c):
-        img = img_in[:, :, i]
+def iDCT(yin, cbcrin):
+    w, h, c = cbcrin.shape
+    cbcrout = np.zeros((w,h,2))
+    for i in range(3):
+        if(i==0):
+            img = yin
+            w, h = img.shape
+            yout = np.zeros((w,h))
+        else:
+            img_in = cbcrin
+            img = img_in[:, :, i]
+            w, h, c = img_in.shape
         cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
         # print(img)
         invDctImg = idct2(img)
-    
+        
+        if(i==0):
+            yout = invDctImg 
+        else:
+            cbcrout[:,:,i-1] = invDctImg
         plt.figure(figsize=(20, 20))
         
         plt.imshow(invDctImg, cm_grey)
         plt.title('IDCT' + str(i))
         plt.axis('image')
-        img_out[:,:,i] = invDctImg
         
-    return img_out
+    return yout,cbcrout
 
 
-def idctBlocks(dctImg, d):
-    w, h, c = dctImg.shape
-    img_out = np.zeros((w,h,3))
-    cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
+def idctBlocks(yin,cbcrin, d):
+    w, h, c = cbcrin.shape
+    cbcrout = np.zeros((w,h,2))
     for k in range(3):
-        idct = np.zeros(dctImg[:,:,k].shape)
+        if(k==0):
+            img = yin
+            w, h = img.shape
+            yout = np.zeros((w,h))
+            idct = np.zeros((w,h))
+            
+        else:
+            img_in = cbcrin
+            img = img_in[:, :, k-1]
+            w, h, c = img_in.shape
+            idct1 = np.zeros((w,h))
+            
+        cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
         
-        dctImg1 = dctImg[:,:,k]
-        for i in r_[:w:d]:
-            for j in r_[:h:d]:
-                idct[i:(i + d), j:(j + d)] = idct2(dctImg1[i:(i + d), j:(j + d)])
-        img_out[:,:,k] = idct
+        
+        dctImg1 = img
+        
+        
+        
+        if(k==0):
+            for i in r_[:w:d]:
+                for j in r_[:h:d]:
+                    idct[i:(i + d), j:(j + d)] = idct2(dctImg1[i:(i + d), j:(j + d)])
+            yout = idct 
+        else:
+            for i in r_[:w:d]:
+                for j in r_[:h:d]:
+                    idct1[i:(i + d), j:(j + d)] = idct2(dctImg1[i:(i + d), j:(j + d)])
+            cbcrout[:,:,k-1] = idct1
         
         
         print("IDCT ---------------------------------------------------- \n" + str(idct))
@@ -253,7 +288,7 @@ def idctBlocks(dctImg, d):
         stringTitle = "IDCT of " + str(d) + "blocks"
         plt.title(stringTitle)
     
-    return img_out
+    return yout,cbcrout
 
 
 def dctBasisImg(img, d):
@@ -278,40 +313,54 @@ def idct2(dctImg):
     return idctImg
 
 
-def DCT_block(img_in):
-    w, h, c = img_in.shape
-    img_out = np.zeros((w,h, 3))
-    img_out64 = np.zeros((w, h, 3))
-    cmBW = clr.LinearSegmentedColormap.from_list(
-        'greyMap', [(0, 0, 0), (1., 1., 1.)], 256)
-    for i in range(c):
-        img = img_in[:, :, i]
+def DCT_block(yin, cbcrin):
+    w, h, c = cbcrin.shape
+    cbcrout = np.zeros((w,h,2))
+    cbcrout64 = np.zeros((w,h,2))
+    for k in range(3):
+        if(k==0):
+            img = yin
+            w, h = img.shape
+            yout = np.zeros((w,h))
+            yout = np.zeros((w,h))
+            yout64 = np.zeros((w,h))
+            
+        else:
+            img_in = cbcrin
+            img = img_in[:, :, k-1]
+            w, h, c = img_in.shape
+        cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
+
         dct8x8, log8x8 = dctBasisImg(img, 8)
         
         fig = plt.figure(figsize=(20, 20))
         fig.add_subplot(1,2,1)
-        plt.imshow(log8x8, cmBW)
+        plt.imshow(log8x8, cm_grey)
         plt.title("Log of 8x8 DCT")
         
         fig.add_subplot(1,2,2)
-        plt.imshow(dct8x8, cmBW, vmax=np.max(dct8x8) * 0.01, vmin=0)
+        plt.imshow(dct8x8,  cm_grey , vmax=np.max(dct8x8) * 0.01, vmin=0)
         plt.title("8x8 DCTs of the image")
         
         dct64x64,log64x64 = dctBasisImg(img, 64)
         
         fig = plt.figure(figsize=(20, 20))
         fig.add_subplot(1,2,1)
-        plt.imshow(log64x64, cmBW)
+        plt.imshow(log64x64,  cm_grey )
         plt.title("Log of 64x64 DCT")
         
         fig.add_subplot(1,2,2)
-        plt.imshow(dct64x64, cmBW, vmax=np.max(dct8x8) * 0.01, vmin=0)
+        plt.imshow(dct64x64,  cm_grey , vmax=np.max(dct8x8) * 0.01, vmin=0)
         plt.title("64x64 DCTs of the image")
        
-        img_out[:,:,i] = dct8x8
-        img_out64[:,:,i] = dct64x64
+        if(k==0):
+            yout = dct8x8
+            yout64 = dct64x64
+        else:
+            cbcrout[:,:,k-1] = dct8x8
+            cbcrout64[:,:,k-1] = dct64x64
         
-    return img_out, img_out64
+    return yout, yout64, cbcrout, cbcrout64
 
 def getMatrix(i, qFactor):
     LumMatrix =  np.array([[16, 11, 10, 16,  24,  40,  51,  61],
@@ -342,13 +391,14 @@ def getMatrix(i, qFactor):
         
     if (qFactor < 50):
         
-        S = 5000/qFactor
+        S = 50/qFactor
     else:
-        S = 200 - 2*qFactor
+        S = (100 - qFactor)/50
         
 
-    matrix = np.floor((S*matrix1 + 50) / 100)
-    matrix[matrix == 0] = 1
+    matrix = np.round(S*matrix1)
+    matrix[matrix > 255] = 255
+    matrix[matrix < 1] = 1
     
     
    
@@ -356,15 +406,24 @@ def getMatrix(i, qFactor):
     return matrix
     
     
-def reverseQuantization(img,qFactor):
-    w,h,c = img.shape
-    img_out = np.zeros((w,h,3))
-    cmBW = clr.LinearSegmentedColormap.from_list(
-        'greyMap', [(0, 0, 0), (1., 1., 1.)], 256)
+def reverseQuantization(yin,cbcrin,qFactor):
+    w, h, c = cbcrin.shape
+    cbcrout = np.zeros((w,h,2))
     for k in range(3):
-        unQuantizedImg = np.zeros(img[:,:,k].shape)
+        if(k==0):
+            img = yin
+            w, h = img.shape
+            yout = np.zeros((w,h))
+            unQuantizedImg = np.zeros(img.shape)
+        else:
+            img_in = cbcrin
+            img = img_in[:, :, k-1]
+            w, h, c = img_in.shape
+            unQuantizedImg = np.zeros((w,h))
+        cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
+       
         matrix = getMatrix(k,qFactor)
-        imgChannel = img[:,:,k]
+        imgChannel = img[:,:]
         for i in r_[:w:8]:
             for j in r_[:h:8]:
                 bocadinho = imgChannel[i:(i + 8), j:(j + 8)]
@@ -372,49 +431,78 @@ def reverseQuantization(img,qFactor):
                 bocadinho = np.round(bocadinho*matrix)
                 unQuantizedImg[i:(i + 8), j:(j + 8)] = bocadinho
                 
-        img_out[:,:,k] = unQuantizedImg
+        if(k==0):
+            yout = unQuantizedImg
+
+        else:
+            cbcrout[:,:,k-1] = unQuantizedImg
         
         plt.figure(figsize=(20, 20))
-        plt.imshow(np.log(np.abs(unQuantizedImg)+0.0001),cmBW)
+        plt.imshow(np.log(np.abs(unQuantizedImg)+0.0001),cm_grey)
         stringTitle = "Channel:" + str(k) + " UnQuantized with Quality of: " + str(qFactor)
         plt.title(stringTitle)
-    return img_out
+    return  yout,cbcrout
         
     
     
-def quantization(img, qFactor):
-    w,h,c = img.shape
-    img_out = np.zeros((w,h,3))
-    cmBW = clr.LinearSegmentedColormap.from_list(
-        'greyMap', [(0, 0, 0), (1., 1., 1.)], 256)
+def quantization(yin, cbcrin, qFactor):
+    w, h, c = cbcrin.shape
+    cbcrout = np.zeros((w,h,2))
     for k in range(3):
-        quantizedImg = np.zeros(img[:,:,k].shape)
+        if(k==0):
+            img = yin
+            w, h = img.shape
+            yout = np.zeros((w,h))
+            QuantizedImg = np.zeros(img.shape)
+            imgChannel = img
+            
+        else:
+            img_in = cbcrin
+            img = img_in[:, :, k-1]
+            w, h, c = img_in.shape
+            QuantizedImg = np.zeros((w,h))
+            imgChannel = img[:,:]
+        cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
+        
         matrix = getMatrix(k,qFactor)
-        imgChannel = img[:,:,k]
+        
         for i in r_[:w:8]:
             for j in r_[:h:8]:
                 bocadinho = imgChannel[i:(i + 8), j:(j + 8)]
                 
-                bocadinho = np.round(bocadinho/(matrix))
-                quantizedImg[i:(i + 8), j:(j + 8)] = bocadinho
+                bocadinho = np.round(bocadinho/matrix)
+                QuantizedImg[i:(i + 8), j:(j + 8)] = bocadinho
                 
-        img_out[:,:,k] = quantizedImg
+        if(k==0):
+            yout = QuantizedImg
+
+        else:
+            cbcrout[:,:,k-1] = QuantizedImg
         
         plt.figure(figsize=(20, 20))
-        plt.imshow(np.log(np.abs(quantizedImg)+0.0001),cmBW)
+        plt.imshow(np.log(np.abs(QuantizedImg)+0.0001),cm_grey)
         stringTitle = "Channel:" + str(k) + " Quantized with Quality of: " + str(qFactor)
         plt.title(stringTitle)
-    return img_out
-
-def DCdpcm(img,flag):
-    w,h,c = img.shape
-    img_out = np.zeros((w,h,3))
-    cmBW = clr.LinearSegmentedColormap.from_list(
-        'greyMap', [(0, 0, 0), (1., 1., 1.)], 256)
-    for k in range(3):
         
-        DPCMimg = np.zeros(img[:,:,k].shape)
-        imgChannel = img[:,:,k]
+    return  yout,cbcrout
+
+def DCdpcm(yin, cbcrin, flag):
+    w, h, c = cbcrin.shape
+    cbcrout = np.zeros((w,h,2))
+    for k in range(3):
+        if(k==0):
+            imgChannel = yin
+            w, h = imgChannel.shape
+            yout = np.zeros((w,h))
+
+            
+        else:
+            img_in = cbcrin
+            w, h, c = cbcrin.shape
+            imgChannel = img_in[:, :, k-1]
+            
+
+        cm_grey = clr.LinearSegmentedColormap.from_list('greyMap', [(0, 0, 0), (1, 1, 1)], 256)
         
         for i in r_[:w:8]:
             for j in r_[:h:8]:
@@ -436,10 +524,14 @@ def DCdpcm(img,flag):
                 else:
                     dc0 = di
         
-        img_out[:,:,k] = imgChannel
+        if(k==0):
+            yout = imgChannel
+
+        else:
+            cbcrout[:,:,k-1] = imgChannel
         
         plt.figure(figsize=(20, 20))
-        plt.imshow(np.log(np.abs(imgChannel)+0.0001),cmBW)
+        plt.imshow(np.log(np.abs(imgChannel)+0.0001),cm_grey)
         if(flag):
             stringTitle = "Channel:" + str(k) + " DPCM'd "
         else:
@@ -447,7 +539,7 @@ def DCdpcm(img,flag):
         
         plt.title(stringTitle)
         
-    return img_out
+    return yout,cbcrout
 
 
 def visualizacao(img):
@@ -697,37 +789,41 @@ def encoder(img, tc, ratio, qFactor):
     img = padding(img)
     # 5
     cbcr = RGB2YCbCr(img, tc)
+    
+    w,h,c = cbcr.shape
+    imgY = np.zeros((w,h))
+    imgNew = np.zeros((w,h,2))
+    imgY = cbcr[:,:,0]
+    imgNew[:,:,0] = cbcr[:,:,1]
+    imgNew[:,:,1] = cbcr[:,:,2]
+    cbcrNew = downsample_nointer(imgNew, ratio)
+    
 
-    cbcr_inter = downsample_inter(cbcr, ratio)
+    yout, yout64, cbcrout, cbcrout64 = DCT_block(imgY,cbcrNew)
 
-    cbcr = downsample_nointer(cbcr, ratio)
+    qyout, qcbcrout = quantization(yout,cbcrout, qFactor)
 
-    imgDct = DCT(cbcr)
+    dpcmy, dpcmcbcr = DCdpcm(qyout,qcbcrout, True)
 
-    dct8x8, dct64x64 = DCT_block(cbcr)
-
-    quantizedImg = quantization(dct8x8, qFactor)
-
-    dpcmImg = DCdpcm(quantizedImg, True)
-
-    return cbcr_inter, dct64x64, imgDct, dpcmImg
+    return  yout64,cbcrout64, dpcmy, dpcmcbcr
 
 
-def decoder(cbcr_inter, dct64x64, imgDct, dpcmImg, h, w, tc, ratio, qFactor):
+def decoder( yout64,cbcrout64, dpcmy, dpcmcbcr, h, w, tc, ratio, qFactor):
     print('Decoding image')
 
-    dpcmInversa = DCdpcm(dpcmImg,False)
-    reverseDpcm = reverseQuantization(dpcmInversa, qFactor)
+    dpcmIy, dpcmIcbcr = DCdpcm(dpcmy,dpcmcbcr,False)
+    rDpcmy, rDpcmcbcr = reverseQuantization(dpcmIy, dpcmIcbcr, qFactor)
 
-    blockedOut = idctBlocks(reverseDpcm, 8)
+    blockedOuty, blockedOutcbcr = idctBlocks(rDpcmy, rDpcmcbcr, 8)
 
-    idctBlocks(dct64x64, 64)
 
-    iDCT(imgDct)
-
-    cbcr_inter = upsample_inter(cbcr_inter, ratio)
-
-    idctBlocks3 = upsample_rep(blockedOut, ratio)
+    cbcrInter = upsample_rep(blockedOutcbcr, ratio)
+    w1,h1,c = cbcrInter.shape
+    idctBlocks3 = np.zeros((w1,h1,3))
+    
+    idctBlocks3[:,:,0] = blockedOuty
+    idctBlocks3[:,:,1] = cbcrInter[:,:,0]
+    idctBlocks3[:,:,2] = cbcrInter[:,:,1]
 
     # 5
     img = YCbCr2RGb(idctBlocks3, tc)
@@ -738,7 +834,26 @@ def decoder(cbcr_inter, dct64x64, imgDct, dpcmImg, h, w, tc, ratio, qFactor):
 
     return img
 
-
+def metrics(img,img_rec):    
+    # Calculation of Mean Squared Error (MSE)
+    mse = np.square(np.subtract(img,img_rec)).mean()
+    rmse = np.sqrt(mse)
+    
+    #snr = signaltonoise(img_rec, axis=0,ddof=0)
+    P = np.sum(np.square(img))/np.prod(img.shape)
+    snr = 10*np.log10(P/mse)
+    
+    if(mse == 0):  # MSE is zero means no noise is present in the signal .
+                  # Therefore PSNR have no importance.
+        return 100
+    max_pixel = 255.0
+    psnr = 20 * np.log10(max_pixel / rmse)
+    
+    print("mse:",mse)
+    print("rmse:",rmse)
+    print("snr:",snr)
+    print("psnr:",psnr)
+    
 def main():
     # 1
     img = {}
@@ -758,10 +873,19 @@ def main():
     tc = np.array([[0.299, 0.587, 0.114],
                    [-0.168736, -0.331264, 0.5],
                    [0.5, -0.418688, -0.081312]])
-    qFactor = 75
+    qFactor = 100
     dsusRatio = 420
     cbcr_inter, dct64x64, imgDct, dpcmImg = encoder(img_in, tc, dsusRatio, qFactor)
     img_dec = decoder(cbcr_inter, dct64x64, imgDct, dpcmImg, h, w, tc, dsusRatio, qFactor)
+    
+    metrics(img[k],img_dec)
+    # imgFinal = img_in - img_dec
+    # cmBW = clr.LinearSegmentedColormap.from_list(
+    #     'greyMap', [(0, 0, 0), (1., 1., 1.)], 256)
+    # plt.figure()
+    # plt.imshow(imgFinal, cmBW)
+    # plt.axis('off')
+    # plt.show()
     # comparison = img[1] == img_dec
     # print(comparison.all())
     # print(img[2], " \n A \n", img_dec)
